@@ -13,6 +13,11 @@
   <a href="https://mailflow.sh/#roadmap">Roadmap</a>
 </p>
 
+> **Fork note (truenji):** this branch is used for the `novosib` deployment.
+> All information about this fork and its development is kept locally on the
+> host in `AGENTS.md`; that file is intentionally not tracked and is listed in
+> `.gitignore`. Upstream `main` is kept in sync.
+
 ## Licensing
 
 MailFlow is dual-licensed:

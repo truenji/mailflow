@@ -1,3 +1,6 @@
+# Host-specific override for /opt/MailFlow on novosib. Always load it together
+# with docker-compose.ghcr.yml — preferably via ./mf.sh, or set COMPOSE_FILE in
+# .env. Plain `docker compose` uses docker-compose.yml (source build) instead.
 x-logging: &default-logging
   driver: json-file
   options:

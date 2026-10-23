@@ -1,13 +1,18 @@
-# MailFlow — pre-built image install
+# MailFlow — pre-built image install (truenji fork, `custom` branch)
 #
 # Quick start:
-#   curl -o docker-compose.yml https://raw.githubusercontent.com/maathimself/mailflow/main/docker-compose.ghcr.yml
-#   curl -o .env               https://raw.githubusercontent.com/maathimself/mailflow/main/.env.example
+#   curl -o docker-compose.ghcr.yml https://raw.githubusercontent.com/truenji/mailflow/custom/docker-compose.ghcr.yml
+#   curl -o .env                   https://raw.githubusercontent.com/truenji/mailflow/custom/.env.example
 #   # edit .env, then:
-#   docker compose up -d
+#   docker compose -f docker-compose.ghcr.yml up -d
 #
-# To pin a specific version instead of latest, set MAILFLOW_VERSION in your .env:
-#   MAILFLOW_VERSION=1.0.0
+# Host-specific deployments should load docker-compose.host.yml as well and use
+# ./mf.sh. Do not add host settings to this file.
+#
+# The fork publishes two tags: an immutable `X.Y.Z-custom.N` and the moving
+# `custom` tag. Pin an exact version for production; `custom` is the default so
+# a fresh install works without extra configuration.
+#   MAILFLOW_VERSION=4.0.4-custom.3
 
 services:
 
@@ -15,7 +20,7 @@ services:
   # Exposes HTTPS on APP_PORT and HTTP on APP_HTTP_PORT.
   # HTTP is intended for use behind a reverse proxy that terminates TLS.
   frontend:
-    image: ghcr.io/truenji/mailflow-frontend:${MAILFLOW_VERSION:-latest}
+    image: ghcr.io/truenji/mailflow-frontend:${MAILFLOW_VERSION:-custom}
     container_name: mailflow-frontend
     restart: unless-stopped
     ports:
@@ -40,7 +45,7 @@ services:
 
   # ── Backend API ──────────────────────────────────────────────────────────────
   backend:
-    image: ghcr.io/truenji/mailflow-backend:${MAILFLOW_VERSION:-latest}
+    image: ghcr.io/truenji/mailflow-backend:${MAILFLOW_VERSION:-custom}
     container_name: mailflow-backend
     restart: unless-stopped
     healthcheck:

@@ -6,3 +6,5 @@
 certs
 *.local
 .git
+data
+AGENTS.md

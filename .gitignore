@@ -2,6 +2,9 @@
 .env
 *.env.local
 
+# Local fork notes (kept on the host only)
+/AGENTS.md
+
 # Local docker compose overrides (e.g. temporary LOG_LEVEL=debug for a soak) — never committed
 docker-compose.override.yml
 
@@ -15,6 +18,9 @@ frontend/packages/release/
 
 # TLS certs (generated locally or via Let's Encrypt)
 certs/
+
+# Runtime data (Postgres/Redis bind mounts on the host)
+/data/
 
 # Logs
 *.log
