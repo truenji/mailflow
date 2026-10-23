@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api.js';
 import { useStore } from '../store/index.js';
@@ -92,6 +92,7 @@ export default function CorrespondenceModal({ messageId, onClose }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const titleId = useId();
 
   useEffect(() => {
     let cancelled = false;
@@ -138,29 +139,36 @@ export default function CorrespondenceModal({ messageId, onClose }) {
         justifyContent: 'center', padding: isMobile ? 0 : 16,
       }}
     >
-      <div style={{
-        width: isMobile ? '100%' : 760,
-        maxWidth: isMobile ? 'none' : 'calc(100vw - 32px)',
-        maxHeight: isMobile ? 'none' : '82vh',
-        height: isMobile ? '100%' : undefined,
-        display: 'flex', flexDirection: 'column', overflow: 'hidden',
-        background: 'var(--bg-elevated)', color: 'var(--text-primary)',
-        borderRadius: isMobile ? 0 : 12,
-        border: isMobile ? 'none' : '1px solid var(--border)',
-        boxShadow: isMobile ? 'none' : 'var(--shadow-modal)',
-        paddingTop: isMobile ? 'var(--sat)' : 0,
-      }}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        style={{
+          width: isMobile ? '100%' : 760,
+          maxWidth: isMobile ? 'none' : 'calc(100vw - 32px)',
+          maxHeight: isMobile ? 'none' : '82vh',
+          height: isMobile ? '100%' : undefined,
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          background: 'var(--bg-elevated)', color: 'var(--text-primary)',
+          borderRadius: isMobile ? 0 : 12,
+          border: isMobile ? 'none' : '1px solid var(--border)',
+          boxShadow: isMobile ? 'none' : 'var(--shadow-modal)',
+          paddingTop: isMobile ? 'var(--sat)' : 0,
+        }}
+      >
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px',
           borderBottom: '1px solid var(--border-subtle)', flexShrink: 0,
         }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div id={titleId} style={{ fontSize: 15, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {title}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 1 }}>
-              {subtitle}
-            </div>
+            {subtitle && (
+              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 1 }}>
+                {subtitle}
+              </div>
+            )}
           </div>
           <button
             onClick={onClose}

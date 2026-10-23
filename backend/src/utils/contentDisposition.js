@@ -17,16 +17,21 @@ export function truncateFilename(name, max) {
   return name.slice(0, name.codePointAt(max - 1) > 0xffff ? max - 1 : max);
 }
 
+// Control characters can break headers and logs; bidi overrides/isolates + RLM/ALM
+// (U+202A–U+202E, U+2066–U+2069, U+200F, U+061C) can make "malware.exe" display as
+// "malware.pdf". Both are stripped on IMAP ingest and again when a stored name is
+// decoded, so the two paths share this helper instead of drifting apart.
+// eslint-disable-next-line no-control-regex -- intentionally stripping control characters (U+0000–U+001F, U+007F)
+const CONTROL_AND_BIDI_RE = /[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069\u200f\u061c]/g;
+
+export function stripFilenameControls(name) {
+  if (!name) return name;
+  return String(name).toWellFormed().replace(CONTROL_AND_BIDI_RE, '').trim();
+}
+
 export function safeFilename(name) {
   if (!name) return 'attachment';
-  const cleaned = String(name)
-    .toWellFormed()
-    .replace(/[/\\]/g, '_')
-    // eslint-disable-next-line no-control-regex -- intentionally stripping control characters (U+0000–U+001F, U+007F)
-    .replace(/[\u0000-\u001f\u007f]/g, '')
-    // Bidi overrides/isolates + RLM/ALM (U+202A–U+202E, U+2066–U+2069, U+200F, U+061C).
-    .replace(/[\u202a-\u202e\u2066-\u2069\u200f\u061c]/g, '')
-    .trim();
+  const cleaned = stripFilenameControls(name).replace(/[/\\]/g, '_');
   return truncateFilename(cleaned, 255) || 'attachment';
 }
 

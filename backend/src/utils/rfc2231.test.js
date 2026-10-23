@@ -72,4 +72,23 @@ describe('normalizeAttachmentFilenames', () => {
     expect(normalizeAttachmentFilenames(null)).toBe(null);
     expect(normalizeAttachmentFilenames('nope')).toBe('nope');
   });
+
+  it('strips bidi overrides and control characters the decoded value may carry', () => {
+    // A legacy row written before the decoder existed still holds the encoded
+    // value. Decoding it must not smuggle U+202E (which reverses the visible
+    // extension) or CR/LF back into a name the attachment strip renders.
+    const attachments = [
+      { filename: "UTF-8''invoice%E2%80%AEfdp.exe" },
+      { filename: "UTF-8''line%0D%0Abreak.pdf" },
+    ];
+    expect(normalizeAttachmentFilenames(attachments)).toEqual([
+      { filename: 'invoicefdp.exe' },
+      { filename: 'linebreak.pdf' },
+    ]);
+  });
+
+  it('sanitizes a plain stored name that predates the ingest-time strip', () => {
+    const attachments = [{ filename: `invoice${String.fromCharCode(0x202e)}fdp.exe` }];
+    expect(normalizeAttachmentFilenames(attachments)).toEqual([{ filename: 'invoicefdp.exe' }]);
+  });
 });

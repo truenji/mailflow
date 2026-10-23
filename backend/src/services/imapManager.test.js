@@ -1541,6 +1541,18 @@ describe('walkStructure attachment classification', () => {
     expect(results.attachments.map(a => a.filename)).toEqual(['invoicefdp.exe', 'abcdef.bin']);
   });
 
+  it('strips control characters from attachment names too', () => {
+    const results = walk({
+      type: 'multipart/mixed',
+      childNodes: [
+        { part: '1', type: 'text/plain', encoding: '7bit', parameters: { charset: 'utf-8' } },
+        { part: '2', type: 'application/pdf', encoding: 'base64', disposition: 'attachment',
+          dispositionParameters: { filename: 'line\r\nbreak.pdf' } },
+      ],
+    });
+    expect(results.attachments.map(a => a.filename)).toEqual(['linebreak.pdf']);
+  });
+
   it('treats an attached HTML file as an attachment, not body text', () => {
     const results = walk({
       type: 'multipart/mixed',
@@ -1829,7 +1841,7 @@ describe('walkStructure attached messages', () => {
       { disposition: 'attachment', envelope: { subject: 'Pay\r\nnow \u202Efdp.exe' } },
       innerBodyAndPdf,
     ));
-    expect(results.attachments[0].filename).toBe('Pay  now fdp.exe.eml');
+    expect(results.attachments[0].filename).toBe('Pay now fdp.exe.eml');
   });
 
   it('stores the .eml for the attachment list built at sync', () => {

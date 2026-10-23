@@ -351,6 +351,8 @@
     "title": "Korespondencja z {{address}}",
     "titleFallback": "Korespondencja",
     "count_one": "{{count}} wiadomość",
+    "count_few": "{{count}} wiadomości",
+    "count_many": "{{count}} wiadomości",
     "count_other": "{{count}} wiadomości",
     "incoming": "Odebrane",
     "outgoing": "Wysłane",

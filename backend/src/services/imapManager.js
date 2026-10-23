@@ -24,7 +24,7 @@ import { applyInboxRules, applyBlockList, newMailAlerts } from './inboxRules.js'
 import { classifyAndTagMessage } from './spamPipeline.js';
 import { generateVCard } from '../utils/vcard.js';
 import { mimeToExtension, standardImageType, rasterImageTypeOfName, sniffImageType } from '../utils/inlineImages.js';
-import { truncateFilename } from '../utils/contentDisposition.js';
+import { stripFilenameControls, truncateFilename } from '../utils/contentDisposition.js';
 import { decodeRfc2231Value } from '../utils/rfc2231.js';
 import { BLOCK, WARN } from './attachmentExtensions.js';
 import { randomBytes, randomUUID } from 'crypto';
@@ -531,15 +531,6 @@ const SYNC_HUNG_MS = 30 * 1000;
 const FLAG_PUSH_RECONCILE_MS = 15 * 1000;
 const FLAG_PUSH_MAX_ATTEMPTS = 40;   // ~10 min of connected retries before honest revert
 const FLAG_PUSH_PER_CYCLE = 30;      // cap setFlag attempts per account per cycle (bounds cycle time)
-
-// Unicode bidi override/embedding characters that can visually reverse a filename,
-// making "malware.exe" display as "malware.pdf" to the user.
-// U+202A-U+202E: LRE, RLE, PDF, LRO, RLO
-// U+2066-U+2069: LRI, RLI, FSI, PDI
-// U+200F: RTL mark  U+061C: Arabic letter mark
-// A character class: joined without brackets, the pattern only matched all eleven characters in a
-// row, so no real filename was ever cleaned and the attachment list showed the spoofed name.
-const BIDI_OVERRIDE_RE = /[\u202A-\u202E\u2066-\u2069\u200F\u061C]/g;
 
 // The attachment list from the BODYSTRUCTURE sync fetches for every new message, without any body
 // part. It is the walk fetchMessageBody runs, so opening the message later stores the same list.
@@ -1179,10 +1170,11 @@ function isRiskyAttachmentName(filename) {
 }
 
 function pushAttachedMessage(node, results) {
+  // A folded subject carries CR/LF; keep the words apart before length-capping.
+  const subject = String(node.envelope?.subject || 'message').replace(/[\r\n]+/g, ' ');
   const rawFilename = decodeRfc2231Value(node.dispositionParameters?.filename || node.parameters?.name)
-    || `${truncateFilename(node.envelope?.subject || 'message', 80)}.eml`;
-  // eslint-disable-next-line no-control-regex -- a folded subject can carry CR/LF and other controls
-  const filename = rawFilename.replace(BIDI_OVERRIDE_RE, '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim() || 'message.eml';
+    || `${truncateFilename(subject, 80)}.eml`;
+  const filename = stripFilenameControls(rawFilename) || 'message.eml';
   const inner = { textParts: [], attachments: [], inlineImages: [], calendarParts: [] };
   for (const child of node.childNodes) walkStructure(child, inner);
   const all = inner.attachments.flatMap(att => [{ filename: att.filename, type: att.type }, ...(att.contains || [])]);
@@ -1217,7 +1209,7 @@ function walkNode(node, results, inRelated) {
   }
   const disposition = (node.disposition || '').toLowerCase();
   const rawFilename = decodeRfc2231Value(node.dispositionParameters?.filename || node.parameters?.name) || null;
-  const filename = rawFilename ? rawFilename.replace(BIDI_OVERRIDE_RE, '').trim() || 'attachment' : null;
+  const filename = rawFilename ? stripFilenameControls(rawFilename) || 'attachment' : null;
   const imageType = imageTypeOf(type, filename);
   // Typed by its name alone: its bytes decide (sniffedImageType).
   const sniff = Boolean(imageType) && !type.startsWith('image/');

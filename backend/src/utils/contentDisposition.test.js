@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { safeFilename, attachmentDisposition, truncateFilename } from './contentDisposition.js';
+import { safeFilename, attachmentDisposition, truncateFilename, stripFilenameControls } from './contentDisposition.js';
 
 // Build all non-ASCII inputs from char codes so this source stays pure ASCII (no invisible chars).
 const cjk = String.fromCharCode(0x767a, 0x7968) + '.pdf'; // 発票.pdf
@@ -101,5 +101,22 @@ describe('attachmentDisposition', () => {
 
   it('falls back to "attachment" for an empty name', () => {
     expect(attachmentDisposition('')).toBe(`attachment; filename="attachment"; filename*=UTF-8''attachment`);
+  });
+});
+
+describe('stripFilenameControls', () => {
+  it('removes bidi overrides and control characters but keeps Unicode, spaces and slashes', () => {
+    expect(stripFilenameControls(`  report${String.fromCharCode(0x202e)}fdp.exe  `)).toBe('reportfdp.exe');
+    expect(stripFilenameControls(withControl)).toBe('ab.pdf');
+    expect(stripFilenameControls(withRLO)).toBe('ab.pdf');
+    expect(stripFilenameControls(withIsolates)).toBe('ab.pdf');
+    expect(stripFilenameControls(cjk)).toBe(cjk);
+    expect(stripFilenameControls('a/b.pdf')).toBe('a/b.pdf');
+  });
+
+  it('leaves falsy values alone', () => {
+    expect(stripFilenameControls(null)).toBe(null);
+    expect(stripFilenameControls('')).toBe('');
+    expect(stripFilenameControls(undefined)).toBe(undefined);
   });
 });

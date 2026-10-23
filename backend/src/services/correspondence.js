@@ -1,5 +1,5 @@
 import { query } from './db.js';
-import { trashFolderExclusionCondition } from '../utils/mailUtils.js';
+import { draftMessageSql, trashFolderExclusionCondition } from '../utils/mailUtils.js';
 
 // A correspondence view is a history, not a pager: one request returns the exchange.
 // The cap keeps a years-long thread with a mailing list from becoming an unbounded
@@ -41,6 +41,15 @@ export function ownAddressSet(accounts = []) {
     }
   }
   return addresses;
+}
+
+// Direction is the user's point of view: a message from one of the user's addresses
+// (or aliases) is outgoing; everything else was received, even when a third party
+// sent it to a group thread where the correspondent is only a recipient.
+export function messageDirection(message, ownAddresses) {
+  const own = ownAddresses instanceof Set ? ownAddresses : ownAddressSet(ownAddresses);
+  const from = normalizeAddress(message?.from_email);
+  return from && own.has(from) ? 'out' : 'in';
 }
 
 // The other party of a message: its sender when the message came in, otherwise the
@@ -92,7 +101,8 @@ export async function listCorrespondence({ userId, messageId }) {
 
   const source = messageResult.rows[0];
   const accounts = await loadAccounts(userId);
-  const correspondent = resolveCorrespondent(source, ownAddressSet(accounts));
+  const own = ownAddressSet(accounts);
+  const correspondent = resolveCorrespondent(source, own);
   if (!correspondent) {
     return { address: null, name: '', messages: [], total: 0, truncated: false };
   }
@@ -111,12 +121,12 @@ export async function listCorrespondence({ userId, messageId }) {
       SELECT DISTINCT ON (m.account_id, COALESCE(m.message_id, m.id::text))
              m.id, m.uid, m.folder, m.message_id, m.thread_id, m.subject,
              m.from_name, m.from_email, m.to_addresses, m.cc_addresses, m.bcc_addresses,
+             m.reply_to, m.in_reply_to, m.thread_references,
              m.date, m.snippet, m.is_read, m.is_starred, m.has_attachments,
              m.account_id, m.category, m.spam_verdict, m.spam_user_override, m.spam_score_ml,
              m.list_unsubscribe, m.list_unsubscribe_post, m.unsubscribed_at, m.delivery_addresses,
              a.name AS account_name, a.email_address AS account_email, a.color AS account_color,
-             (co.id IS NOT NULL) AS has_contact_photo,
-             (lower(trim(m.from_email)) = $2) AS incoming
+             (co.id IS NOT NULL) AS has_contact_photo
       FROM messages m
       JOIN email_accounts a ON m.account_id = a.id
       LEFT JOIN contacts co ON co.user_id = a.user_id
@@ -143,6 +153,7 @@ export async function listCorrespondence({ userId, messageId }) {
           )
         )
         AND ${trashFolderExclusionCondition()}
+        AND NOT ${draftMessageSql('m')}
       ORDER BY m.account_id,
                COALESCE(m.message_id, m.id::text),
                CASE WHEN m.folder = 'INBOX' THEN 0 ELSE 1 END,
@@ -152,15 +163,14 @@ export async function listCorrespondence({ userId, messageId }) {
       SELECT deduped.*, COUNT(*) OVER()::int AS total FROM deduped
     )
     SELECT * FROM counted
-    ORDER BY date DESC, account_id, id
+    ORDER BY date DESC NULLS LAST, account_id, id
     LIMIT $3
   `, [accountIds, correspondent.email, CORRESPONDENCE_LIMIT]);
 
   const total = result.rows[0]?.total ?? 0;
   const messages = result.rows.map(row => {
-    const message = { ...row, direction: row.incoming ? 'in' : 'out' };
+    const message = { ...row, direction: messageDirection(row, own) };
     delete message.total;
-    delete message.incoming;
     return message;
   });
 

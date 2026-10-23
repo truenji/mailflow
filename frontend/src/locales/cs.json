@@ -469,6 +469,8 @@
     "title": "Korespondence s {{address}}",
     "titleFallback": "Korespondence",
     "count_one": "{{count}} zpráva",
+    "count_few": "{{count}} zprávy",
+    "count_many": "{{count}} zprávy",
     "count_other": "{{count}} zpráv",
     "incoming": "Přijato",
     "outgoing": "Odesláno",

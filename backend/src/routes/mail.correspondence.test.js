@@ -88,8 +88,9 @@ describe('GET /mail/messages/:id/correspondence', () => {
         { id: 'a2a2a2a2-2222-4222-8222-a2a2a2a2a2a2', email_address: 'disabled@example.com', enabled: false, alias_emails: [] },
       ],
       correspondence: [
-        { id: 'm2', from_email: 'client@example.com', incoming: false, total: 3, subject: 'Re: Order' },
-        { id: 'm1', from_email: 'sales@example.com', incoming: true, total: 3, subject: 'Order' },
+        { id: 'm3', from_email: 'colleague@example.com', total: 4, subject: 'Intro' },
+        { id: 'm2', from_email: 'client@example.com', total: 4, subject: 'Re: Order' },
+        { id: 'm1', from_email: 'sales@example.com', total: 4, subject: 'Order' },
       ],
     });
 
@@ -98,11 +99,14 @@ describe('GET /mail/messages/:id/correspondence', () => {
     const body = await response.json();
     expect(body.address).toBe('client@example.com');
     expect(body.name).toBe('Client');
-    expect(body.total).toBe(3);
+    expect(body.total).toBe(4);
     expect(body.truncated).toBe(true);
     expect(body.messages).toEqual([
-      { id: 'm2', from_email: 'client@example.com', subject: 'Re: Order', direction: 'out' },
-      { id: 'm1', from_email: 'sales@example.com', subject: 'Order', direction: 'in' },
+      // A third party wrote to a group thread: received, not sent.
+      { id: 'm3', from_email: 'colleague@example.com', subject: 'Intro', direction: 'in' },
+      { id: 'm2', from_email: 'client@example.com', subject: 'Re: Order', direction: 'in' },
+      // Sent from one of the user's aliases.
+      { id: 'm1', from_email: 'sales@example.com', subject: 'Order', direction: 'out' },
     ]);
 
     const [, params] = query.mock.calls.find(([sql]) => CORRESPONDENCE_SQL.test(sql));
@@ -113,6 +117,13 @@ describe('GET /mail/messages/:id/correspondence', () => {
     expect(sql).toContain('bcc_addresses');
     expect(sql).toContain("f.special_use = '\\Trash'");
     expect(sql).toContain('COUNT(*) OVER()::int AS total');
+    // The reader opens these rows directly, so the reply headers must ride along.
+    expect(sql).toContain('m.reply_to');
+    expect(sql).toContain('m.in_reply_to');
+    expect(sql).toContain('m.thread_references');
+    // An unsent draft is not correspondence.
+    expect(sql).toContain("m.flags ? '\\Draft'");
+    expect(sql).toContain('NULLS LAST');
   });
 
   it('reports failures without leaking the database error', async () => {

@@ -575,8 +575,12 @@ const SAME_VALUE_ALLOWED = {
 // required by its Intl.PluralRules categories without forcing every other locale
 // to carry unused keys. Existing locale files may also define their own forms.
 const LOCALE_SPECIFIC_KEYS_BY_LOCALE = {
+  ru: new Set([
+    'correspondence.count_few', 'correspondence.count_many',
+  ]),
   cs: new Set([
     'message.attachment_few', 'message.attachment_many',
+    'correspondence.count_few', 'correspondence.count_many',
     'messageList.bulkDeleted.title_few', 'messageList.bulkDeleted.title_many',
     'messageList.bulkDeleted.failBody_few', 'messageList.bulkDeleted.failBody_many',
     'messageList.bulkMoved.title_few', 'messageList.bulkMoved.title_many',
@@ -590,6 +594,7 @@ const LOCALE_SPECIFIC_KEYS_BY_LOCALE = {
   ]),
   pl: new Set([
     'message.attachment_few', 'message.attachment_many',
+    'correspondence.count_few', 'correspondence.count_many',
     'messageList.bulkDeleted.title_few', 'messageList.bulkDeleted.title_many',
     'messageList.bulkDeleted.failBody_few', 'messageList.bulkDeleted.failBody_many',
     'messageList.bulkMoved.title_few', 'messageList.bulkMoved.title_many',
@@ -1024,4 +1029,52 @@ describe('Czech plural resolution', () => {
       assert.equal(instance.t('message.attachment', { count }), value, `count=${count}`);
     }
   });
+});
+
+describe('Correspondence count plural resolution', () => {
+  // Russian, Czech and Polish select few/many categories that en.json does not
+  // carry. Without the locale-specific forms i18next returns the key (or the
+  // English fallback) for all but a handful of counts.
+  const expected = {
+    ru: new Map([
+      [1, '1 письмо'],
+      [2, '2 письма'],
+      [5, '5 писем'],
+      [21, '21 письмо'],
+      [22, '22 письма'],
+      [25, '25 писем'],
+    ]),
+    cs: new Map([
+      [1, '1 zpráva'],
+      [2, '2 zprávy'],
+      [5, '5 zpráv'],
+      [21, '21 zpráv'],
+      [22, '22 zpráv'],
+    ]),
+    pl: new Map([
+      [1, '1 wiadomość'],
+      [2, '2 wiadomości'],
+      [5, '5 wiadomości'],
+      [21, '21 wiadomości'],
+      [22, '22 wiadomości'],
+    ]),
+  };
+
+  for (const [lng, counts] of Object.entries(expected)) {
+    it(`uses the ${lng} plural categories`, async () => {
+      const instance = i18next.createInstance();
+      await instance.init({
+        lng,
+        fallbackLng: false,
+        resources: {
+          [lng]: { translation: JSON.parse(readFileSync(join(dir, `${lng}.json`), 'utf8')) },
+        },
+        interpolation: { escapeValue: false },
+      });
+
+      for (const [count, value] of counts) {
+        assert.equal(instance.t('correspondence.count', { count }), value, `${lng} count=${count}`);
+      }
+    });
+  }
 });
