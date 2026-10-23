@@ -61,6 +61,7 @@ try {
 export const APP_VERSION = (process.env.APP_VERSION || buildMeta.version || packageMeta.version).replace(/^v[.]?/, '');
 
 const app = express();
+app.disable('x-powered-by');
 // Trust the nginx reverse proxy so req.secure reflects HTTPS correctly.
 // Without this, express-session sees HTTP (from nginx) and refuses to set
 // the Secure cookie, meaning the session cookie is never sent to the browser.
