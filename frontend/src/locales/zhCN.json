@@ -342,7 +342,22 @@
       "title": "暂停至 {{when}}",
       "failTitle": "无法更改提醒时间",
       "failBody": "保留原来的时间。请重试。"
-    }
+    },
+    "showCorrespondence": "查看往来邮件"
+  },
+  "correspondence": {
+    "title": "与 {{address}} 的往来邮件",
+    "titleFallback": "往来邮件",
+    "count_one": "{{count}} 封邮件",
+    "count_other": "{{count}} 封邮件",
+    "incoming": "已接收",
+    "outgoing": "已发送",
+    "empty": "还没有与此地址的邮件",
+    "noAddress": "无法确定这封邮件的对方地址",
+    "error": "无法加载往来邮件",
+    "truncated": "仅显示最近的邮件",
+    "close": "关闭",
+    "open": "打开邮件"
   },
   "messageList": {
     "replyDraftChanged": "回复草稿已更改。请尝试重新打开。",

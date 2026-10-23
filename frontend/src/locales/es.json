@@ -342,7 +342,22 @@
       "title": "Pospuesto hasta {{when}}",
       "failTitle": "No se pudo cambiar la hora",
       "failBody": "Mantiene la hora anterior. Inténtalo de nuevo."
-    }
+    },
+    "showCorrespondence": "Mostrar correspondencia"
+  },
+  "correspondence": {
+    "title": "Correspondencia con {{address}}",
+    "titleFallback": "Correspondencia",
+    "count_one": "{{count}} mensaje",
+    "count_other": "{{count}} mensajes",
+    "incoming": "Recibido",
+    "outgoing": "Enviado",
+    "empty": "Aún no hay mensajes con esta dirección",
+    "noAddress": "No se pudo determinar la otra parte de este mensaje",
+    "error": "No se pudo cargar la correspondencia",
+    "truncated": "Solo se muestran los mensajes más recientes",
+    "close": "Cerrar",
+    "open": "Abrir mensaje"
   },
   "messageList": {
     "replyDraftChanged": "El borrador de respuesta ha cambiado. Intenta abrirlo de nuevo.",

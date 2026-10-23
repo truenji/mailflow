@@ -342,7 +342,22 @@
       "title": "Adiado até {{when}}",
       "failTitle": "Não foi possível alterar o horário",
       "failBody": "O horário anterior foi mantido. Tente novamente."
-    }
+    },
+    "showCorrespondence": "Mostrar correspondência"
+  },
+  "correspondence": {
+    "title": "Correspondência com {{address}}",
+    "titleFallback": "Correspondência",
+    "count_one": "{{count}} mensagem",
+    "count_other": "{{count}} mensagens",
+    "incoming": "Recebido",
+    "outgoing": "Enviada",
+    "empty": "Ainda não há mensagens com este endereço",
+    "noAddress": "Não foi possível determinar a outra parte desta mensagem",
+    "error": "Não foi possível carregar a correspondência",
+    "truncated": "Apenas as mensagens mais recentes são exibidas",
+    "close": "Fechar",
+    "open": "Abrir mensagem"
   },
   "messageList": {
     "replyDraftChanged": "O rascunho de resposta mudou. Tente abri-lo novamente.",

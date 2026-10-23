@@ -462,7 +462,22 @@
       "title": "Odloženo do {{when}}",
       "failTitle": "Čas návratu se nepodařilo změnit",
       "failBody": "Zůstává původní čas. Zkuste to znovu."
-    }
+    },
+    "showCorrespondence": "Zobrazit korespondenci"
+  },
+  "correspondence": {
+    "title": "Korespondence s {{address}}",
+    "titleFallback": "Korespondence",
+    "count_one": "{{count}} zpráva",
+    "count_other": "{{count}} zpráv",
+    "incoming": "Přijato",
+    "outgoing": "Odesláno",
+    "empty": "S touto adresou zatím nejsou žádné zprávy",
+    "noAddress": "Protistranu této zprávy se nepodařilo určit",
+    "error": "Korespondenci se nepodařilo načíst",
+    "truncated": "Zobrazují se pouze nejnovější zprávy",
+    "close": "Zavřít",
+    "open": "Otevřít zprávu"
   },
   "compose": {
     "unsupportedDraftFrom": "Před uložením nebo odesláním tohoto konceptu vyberte nastaveného odesílatele.",

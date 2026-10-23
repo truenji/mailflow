@@ -19,11 +19,13 @@ import { snippetFromBody, decodeMimeWords, parseRawHeaders, parseMailboxList, bu
 import { draftMessageSql, resolveTrashFolder, resolveAllTrashPaths, resolveAllDraftsPaths, resolveArchiveFolder, isAllMailFolder, resolveSpamFolder, resolveAllSpamPaths, getDeleteStrategy, adjustFolderCounts, fanOutReadToSiblings, fanOutStarToSiblings, fanOutBulkReadToSiblings, readCopyTargets, pushSeen } from '../utils/mailUtils.js';
 import { pluginRegistry } from '../plugins/registry.js';
 import { listMessages } from '../services/messageService.js';
+import { listCorrespondence } from '../services/correspondence.js';
 import { recordSyncSignal } from '../services/diagnosticsRing.js';
 import { resolveAccountScope } from '../services/unifiedInbox.js';
 import { validateHost } from '../services/hostValidation.js';
 import { safeFetch } from '../services/safeFetch.js';
 import { safeFilename, attachmentDisposition, truncateFilename } from '../utils/contentDisposition.js';
+import { normalizeAttachmentFilenames } from '../utils/rfc2231.js';
 import { tokenize, extractFlagFeatures } from '../services/spamTokenizer.js';
 import { updateIncrementalForUser } from '../services/spamModelStore.js';
 
@@ -349,6 +351,20 @@ async function getThread(req, res, threadId) {
 router.get('/thread', (req, res) => getThread(req, res, req.query.id));
 router.get('/thread/:threadId', (req, res) => getThread(req, res, req.params.threadId));
 
+// Every message exchanged with the other party of one message, received and sent,
+// across the user's accounts. Clicking "Show correspondence" in the reader calls this.
+router.get('/messages/:id/correspondence', async (req, res) => {
+  const { id } = req.params;
+  if (!UUID_RE.test(id)) return res.status(400).json({ error: 'Invalid message ID' });
+  try {
+    res.json(await listCorrespondence({ userId: req.session.userId, messageId: id }));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error('Correspondence fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to load correspondence' });
+  }
+});
+
 // Counts are snapshots independently measured on the IMAP server, never cache tallies.
 router.get('/unread-counts', async (req, res) => {
   const result = await query(`SELECT a.id AS account_id, a.include_in_unified_inbox,
@@ -504,9 +520,15 @@ router.get('/messages/:id/body', async (req, res) => {
     // CSS url(http://) in inline style attributes or <style> blocks
     /url\(\s*['"]?http:\/\//i.test(message.body_html)
   );
-  const cachedAttachments = message.attachments
+  const storedAttachments = message.attachments
     ? (typeof message.attachments === 'string' ? JSON.parse(message.attachments) : message.attachments)
     : [];
+  const cachedAttachments = normalizeAttachmentFilenames(storedAttachments);
+  if (cachedAttachments !== storedAttachments) {
+    // Rows written before the decoder used to show "UTF-8''%D0%9A..." as the file
+    // name. Persist the repaired list so downloads and later reads agree with it.
+    query('UPDATE messages SET attachments = $1 WHERE id = $2', [JSON.stringify(cachedAttachments), id]).catch(() => {});
+  }
   const cached = Boolean(message.body_html || message.body_text);
   // A body the release before served as stored, fetched again only to repair its images: one
   // settled under an earlier marker, or one an email's own images may show in now (#640). When
@@ -780,9 +802,9 @@ router.get('/messages/:id/attachments.zip', async (req, res) => {
   if (!result.rows.length) return res.status(404).json({ error: 'Message not found' });
   const message = result.rows[0];
 
-  const attachments = typeof message.attachments === 'string'
+  const attachments = normalizeAttachmentFilenames(typeof message.attachments === 'string'
     ? JSON.parse(message.attachments || '[]')
-    : (message.attachments || []);
+    : (message.attachments || []));
 
   if (attachments.length === 0) return res.status(404).json({ error: 'No attachments' });
   if (attachments.length > ZIP_MAX_FILES) return res.status(400).json({ error: `Too many attachments (max ${ZIP_MAX_FILES})` });
@@ -865,9 +887,9 @@ router.get('/messages/:id/attachments/:part', async (req, res) => {
   const message = result.rows[0];
 
   // Find attachment metadata
-  const attachments = typeof message.attachments === 'string'
+  const attachments = normalizeAttachmentFilenames(typeof message.attachments === 'string'
     ? JSON.parse(message.attachments || '[]')
-    : (message.attachments || []);
+    : (message.attachments || []));
   const att = attachments.find(a => a.part === partNum);
   if (!att) return res.status(404).json({ error: 'Attachment not found' });
 

@@ -319,6 +319,21 @@ export async function pushSeen(manager, account, accountId, rows, read) {
   return pushedIds;
 }
 
+// SQL predicate excluding messages that sit in an account's trash folder. Used by the
+// cross-folder views (search over every folder, correspondence) so deleted mail does not
+// come back as a historical match. `m` is the messages alias.
+export function trashFolderExclusionCondition() {
+  return `NOT EXISTS (
+        SELECT 1
+        FROM folders f
+        WHERE f.account_id = m.account_id
+          AND f.path = m.folder
+          AND (f.special_use = '\\Trash'
+               OR lower(f.name) LIKE '%trash%'
+               OR lower(f.name) LIKE '%deleted%')
+      )`;
+}
+
 // Determine what action to take when deleting a message.
 // Returns { action: 'move', destination } | { action: 'expunge' } | { action: 'no_trash' }.
 // 'no_trash' must be treated as a safe failure — never permanently delete when

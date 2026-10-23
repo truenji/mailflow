@@ -1689,6 +1689,43 @@ describe('attachment-only messages have no body', () => {
   });
 });
 
+// ImapFlow only repairs an RFC 2231 ext-value in the plain `filename` parameter when
+// its charset is written in lower case. Yandex sends `UTF-8''...`, which reached the
+// UI still percent-encoded.
+describe('walkStructure decodes RFC 2231 filenames', () => {
+  const YANDEX_FILENAME = "UTF-8''%D0%9A%D0%B0%D1%80%D1%82%D0%BE%D1%87%D0%BA%D0%B0"
+    + '%20%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%B0%20%D0%90%D0%9E%20'
+    + '%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D0%B8%D0%BA%D0%B0%20'
+    + '%32%30%32%36%2E%70%64%66';
+  const walk = (node) => {
+    const results = { textParts: [], attachments: [] };
+    walkStructure(node, results);
+    return results;
+  };
+
+  it('decodes a filename carried by Content-Disposition', () => {
+    const results = walk({
+      type: 'multipart/mixed',
+      childNodes: [
+        { part: '1', type: 'text/plain' },
+        { part: '2', type: 'application/pdf', disposition: 'attachment', dispositionParameters: { filename: YANDEX_FILENAME } },
+      ],
+    });
+    expect(results.attachments.map(a => a.filename)).toEqual(['Карточка клиента АО Органика 2026.pdf']);
+  });
+
+  it('decodes a filename carried by the Content-Type name parameter', () => {
+    const results = walk({
+      type: 'multipart/mixed',
+      childNodes: [
+        { part: '1', type: 'text/plain' },
+        { part: '2', type: 'application/pdf', parameters: { name: YANDEX_FILENAME } },
+      ],
+    });
+    expect(results.attachments.map(a => a.filename)).toEqual(['Карточка клиента АО Органика 2026.pdf']);
+  });
+});
+
 // A forwarded message attached as a file. imapflow gives a message/rfc822 part the embedded
 // message's structure as children, reusing the wrapper's part number (so its parts are 2.1, 2.2).
 describe('walkStructure attached messages', () => {

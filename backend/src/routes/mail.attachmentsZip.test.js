@@ -6,7 +6,7 @@ vi.mock('../middleware/auth.js', () => ({
   requireAuth: (req, _res, next) => { req.session = { userId: 'user-1' }; next(); },
 }));
 vi.mock('../index.js', () => ({
-  imapManager: { fetchMultipleAttachments: vi.fn(), broadcast: vi.fn() },
+  imapManager: { fetchMultipleAttachments: vi.fn(), fetchAttachment: vi.fn(), broadcast: vi.fn() },
 }));
 
 import express from 'express';
@@ -34,6 +34,7 @@ describe('GET /api/mail/messages/:id/attachments.zip', () => {
   beforeEach(() => {
     query.mockReset();
     imapManager.fetchMultipleAttachments.mockReset().mockResolvedValue(new Map([['2', Buffer.from('pdf')]]));
+    imapManager.fetchAttachment.mockReset().mockResolvedValue(Buffer.from('pdf'));
     row = {
       id: MSG_ID, uid: '42', folder: 'INBOX', subject: 'Quarterly report', account_id: ACCOUNT_ID, user_id: 'user-1',
       attachments: [{ part: '2', filename: 'report.pdf', size: 3, type: 'application/pdf' }],
@@ -60,6 +61,22 @@ describe('GET /api/mail/messages/:id/attachments.zip', () => {
     const res = await fetch(`${base}/api/mail/messages/${MSG_ID}/attachments.zip`);
     expect(res.status).toBe(200);
     expect(zipFilename(res)).toBe('x'.repeat(99) + '-attachments.zip');
+    await res.arrayBuffer();
+  });
+
+  it('decodes an RFC 2231 filename stored in the cached attachment list', async () => {
+    row.attachments = [{
+      part: '2', size: 3, type: 'application/pdf',
+      filename: "UTF-8''%D0%9A%D0%B0%D1%80%D1%82%D0%BE%D1%87%D0%BA%D0%B0"
+        + '%20%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%B0%20%D0%90%D0%9E%20'
+        + '%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D0%B8%D0%BA%D0%B0%20'
+        + '%32%30%32%36%2E%70%64%66',
+    }];
+
+    const res = await fetch(`${base}/api/mail/messages/${MSG_ID}/attachments/2`);
+    expect(res.status).toBe(200);
+    const encoded = res.headers.get('content-disposition').match(/filename\*=UTF-8''(.+)$/)[1];
+    expect(decodeURIComponent(encoded)).toBe('Карточка клиента АО Органика 2026.pdf');
     await res.arrayBuffer();
   });
 });

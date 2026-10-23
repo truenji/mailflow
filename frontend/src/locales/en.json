@@ -342,7 +342,22 @@
       "title": "Snoozed until {{when}}",
       "failTitle": "Could not change the snooze time",
       "failBody": "It keeps its earlier time. Try again."
-    }
+    },
+    "showCorrespondence": "Show correspondence"
+  },
+  "correspondence": {
+    "title": "Correspondence with {{address}}",
+    "titleFallback": "Correspondence",
+    "count_one": "{{count}} message",
+    "count_other": "{{count}} messages",
+    "incoming": "Received",
+    "outgoing": "Sent",
+    "empty": "No messages with this address yet",
+    "noAddress": "Could not determine the other party of this message",
+    "error": "Could not load the correspondence",
+    "truncated": "Only the most recent messages are shown",
+    "close": "Close",
+    "open": "Open message"
   },
   "messageList": {
     "replyDraftChanged": "The reply draft changed. Try opening it again.",

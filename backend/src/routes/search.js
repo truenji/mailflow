@@ -2,6 +2,9 @@ import { Router } from 'express';
 import { query } from '../services/db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { resolveAccountScope } from '../services/unifiedInbox.js';
+import { trashFolderExclusionCondition } from '../utils/mailUtils.js';
+
+export { trashFolderExclusionCondition };
 
 const router = Router();
 router.use(requireAuth);
@@ -90,18 +93,6 @@ export function resolveSearchFolderScope(filters, folderParam = '') {
 
 export function shouldExcludeTrashFromSearch(folderScope) {
   return folderScope === null;
-}
-
-export function trashFolderExclusionCondition() {
-  return `NOT EXISTS (
-        SELECT 1
-        FROM folders f
-        WHERE f.account_id = m.account_id
-          AND f.path = m.folder
-          AND (f.special_use = '\\Trash'
-               OR lower(f.name) LIKE '%trash%'
-               OR lower(f.name) LIKE '%deleted%')
-      )`;
 }
 
 // Postgres refuses to build a tsvector larger than ~1MB of packed lexemes

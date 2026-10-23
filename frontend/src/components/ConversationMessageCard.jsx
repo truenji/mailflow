@@ -12,6 +12,7 @@ import { openReplyFromMessage, openForwardFromMessage } from '../utils/composeFr
 import { shortcutBus } from '../utils/shortcutBus.js';
 import MessageBodyView from './MessageBodyView.jsx';
 import AttachmentStrip from './AttachmentStrip.jsx';
+import CorrespondenceButton from './CorrespondenceButton.jsx';
 import { isDarkTheme, canShowDark, showDark } from '../utils/darkScheme.js';
 import AiResultBox from './AiResultBox.jsx';
 import { useAiActions } from '../hooks/useAiActions.js';
@@ -349,6 +350,14 @@ export default function ConversationMessageCard({ message, expanded, onToggle, o
             <CardBtn onClick={() => openForwardFromMessage(message, { openCompose, getMessageBody: loadedBody })}>
               {t('message.forward')}
             </CardBtn>
+            <CorrespondenceButton
+              messageId={message.id}
+              style={{
+                padding: '4px 10px', background: 'none', border: '1px solid var(--border)',
+                borderRadius: 4, color: 'var(--text-primary)', font: 'inherit', fontSize: 13,
+                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5,
+              }}
+            />
             <CardBtn onClick={handleStar}>
               {message.is_starred ? t('contextMenu.unstar') : t('contextMenu.star')}
             </CardBtn>

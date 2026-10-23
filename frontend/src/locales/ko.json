@@ -342,7 +342,22 @@
       "title": "{{when}}까지 다시 알림 대기",
       "failTitle": "다시 알림 시간을 변경하지 못했습니다",
       "failBody": "이전 시간이 유지됩니다. 다시 시도하세요."
-    }
+    },
+    "showCorrespondence": "주고받은 메일 보기"
+  },
+  "correspondence": {
+    "title": "{{address}}과(와)의 주고받은 메일",
+    "titleFallback": "주고받은 메일",
+    "count_one": "메일 {{count}}통",
+    "count_other": "메일 {{count}}통",
+    "incoming": "받은 메일",
+    "outgoing": "보낸 메일",
+    "empty": "이 주소와 주고받은 메일이 아직 없습니다",
+    "noAddress": "이 메일의 상대방 주소를 확인할 수 없습니다",
+    "error": "주고받은 메일을 불러오지 못했습니다",
+    "truncated": "최근 메일만 표시됩니다",
+    "close": "닫기",
+    "open": "메일 열기"
   },
   "messageList": {
     "replyDraftChanged": "답장 초안이 변경되었습니다. 다시 열어 보세요.",

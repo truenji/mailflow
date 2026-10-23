@@ -557,6 +557,11 @@ const SAME_VALUE_ALLOWED = {
   'message.trackersBlocked_one':   [['es', 'ptBR']],
   'message.trackersBlocked_other': [['es', 'ptBR']],
 
+  // ── Correspondence view ───────────────────────────────────────────────────
+  // French spells "message"/"messages" exactly as English.
+  'correspondence.count_one':   [['en', 'fr']],
+  'correspondence.count_other': [['en', 'fr']],
+
   // ── Mailbox icon ──────────────────────────────────────────────────────────
   // "Ikona" is the word in both Czech and Polish.
   'admin.accounts.icon': [['cs', 'pl']],

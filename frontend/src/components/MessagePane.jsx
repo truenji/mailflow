@@ -34,6 +34,7 @@ import { buildPrintDocument, openPrintWindow, printInWindow } from '../utils/pri
 import AiResultBox from './AiResultBox.jsx';
 import { useAiActions } from '../hooks/useAiActions.js';
 import AttachmentStrip from './AttachmentStrip.jsx';
+import CorrespondenceButton from './CorrespondenceButton.jsx';
 const USE_DIV_RENDER = import.meta.env.VITE_EMAIL_DIV_RENDER === 'true';
 const MESSAGE_OPENING_EVENT = 'mailflow:message-opening';
 
@@ -2016,6 +2017,16 @@ export default function MessagePane({ windowMessageId = null, onWindowClose = nu
                   )}
                 </>
               )}
+              <CorrespondenceButton
+                messageId={message.id}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  marginTop: 7, padding: '3px 9px', background: 'none',
+                  border: '1px solid var(--border)', borderRadius: 5,
+                  color: 'var(--text-secondary)', cursor: 'pointer',
+                  font: 'inherit', fontSize: 11,
+                }}
+              />
             </div>
 
             {/* Date + account */}

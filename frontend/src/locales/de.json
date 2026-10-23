@@ -342,7 +342,22 @@
       "title": "Zurückgestellt bis {{when}}",
       "failTitle": "Zeitpunkt konnte nicht geändert werden",
       "failBody": "Der bisherige Zeitpunkt bleibt. Bitte erneut versuchen."
-    }
+    },
+    "showCorrespondence": "Korrespondenz anzeigen"
+  },
+  "correspondence": {
+    "title": "Korrespondenz mit {{address}}",
+    "titleFallback": "Korrespondenz",
+    "count_one": "{{count}} Nachricht",
+    "count_other": "{{count}} Nachrichten",
+    "incoming": "Empfangen",
+    "outgoing": "Gesendet",
+    "empty": "Noch keine Nachrichten mit dieser Adresse",
+    "noAddress": "Die Gegenstelle dieser Nachricht konnte nicht ermittelt werden",
+    "error": "Die Korrespondenz konnte nicht geladen werden",
+    "truncated": "Es werden nur die neuesten Nachrichten angezeigt",
+    "close": "Schließen",
+    "open": "Nachricht öffnen"
   },
   "messageList": {
     "replyDraftChanged": "Der Antwortentwurf wurde geändert. Öffne ihn erneut.",

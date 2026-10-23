@@ -25,6 +25,7 @@ import { classifyAndTagMessage } from './spamPipeline.js';
 import { generateVCard } from '../utils/vcard.js';
 import { mimeToExtension, standardImageType, rasterImageTypeOfName, sniffImageType } from '../utils/inlineImages.js';
 import { truncateFilename } from '../utils/contentDisposition.js';
+import { decodeRfc2231Value } from '../utils/rfc2231.js';
 import { BLOCK, WARN } from './attachmentExtensions.js';
 import { randomBytes, randomUUID } from 'crypto';
 
@@ -1178,7 +1179,7 @@ function isRiskyAttachmentName(filename) {
 }
 
 function pushAttachedMessage(node, results) {
-  const rawFilename = node.dispositionParameters?.filename || node.parameters?.name
+  const rawFilename = decodeRfc2231Value(node.dispositionParameters?.filename || node.parameters?.name)
     || `${truncateFilename(node.envelope?.subject || 'message', 80)}.eml`;
   // eslint-disable-next-line no-control-regex -- a folded subject can carry CR/LF and other controls
   const filename = rawFilename.replace(BIDI_OVERRIDE_RE, '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim() || 'message.eml';
@@ -1215,7 +1216,7 @@ function walkNode(node, results, inRelated) {
     return;
   }
   const disposition = (node.disposition || '').toLowerCase();
-  const rawFilename = node.dispositionParameters?.filename || node.parameters?.name || null;
+  const rawFilename = decodeRfc2231Value(node.dispositionParameters?.filename || node.parameters?.name) || null;
   const filename = rawFilename ? rawFilename.replace(BIDI_OVERRIDE_RE, '').trim() || 'attachment' : null;
   const imageType = imageTypeOf(type, filename);
   // Typed by its name alone: its bytes decide (sniffedImageType).

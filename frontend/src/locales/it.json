@@ -342,7 +342,22 @@
       "title": "Posticipato fino a {{when}}",
       "failTitle": "Impossibile cambiare l'orario",
       "failBody": "Resta l'orario precedente. Riprova."
-    }
+    },
+    "showCorrespondence": "Mostra corrispondenza"
+  },
+  "correspondence": {
+    "title": "Corrispondenza con {{address}}",
+    "titleFallback": "Corrispondenza",
+    "count_one": "{{count}} messaggio",
+    "count_other": "{{count}} messaggi",
+    "incoming": "Ricevuto",
+    "outgoing": "Inviato",
+    "empty": "Nessun messaggio con questo indirizzo per ora",
+    "noAddress": "Impossibile determinare l'altra parte di questo messaggio",
+    "error": "Impossibile caricare la corrispondenza",
+    "truncated": "Vengono mostrati solo i messaggi più recenti",
+    "close": "Chiudi",
+    "open": "Apri messaggio"
   },
   "messageList": {
     "replyDraftChanged": "La bozza di risposta è cambiata. Prova ad aprirla di nuovo.",

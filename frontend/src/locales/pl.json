@@ -344,7 +344,22 @@
       "title": "Odłożone do {{when}}",
       "failTitle": "Nie udało się zmienić czasu powrotu",
       "failBody": "Pozostaje poprzedni czas. Spróbuj ponownie."
-    }
+    },
+    "showCorrespondence": "Pokaż korespondencję"
+  },
+  "correspondence": {
+    "title": "Korespondencja z {{address}}",
+    "titleFallback": "Korespondencja",
+    "count_one": "{{count}} wiadomość",
+    "count_other": "{{count}} wiadomości",
+    "incoming": "Odebrane",
+    "outgoing": "Wysłane",
+    "empty": "Brak wiadomości z tym adresem",
+    "noAddress": "Nie udało się ustalić drugiej strony tej wiadomości",
+    "error": "Nie udało się wczytać korespondencji",
+    "truncated": "Wyświetlane są tylko najnowsze wiadomości",
+    "close": "Zamknij",
+    "open": "Otwórz wiadomość"
   },
   "messageList": {
     "replyDraftChanged": "Szkic odpowiedzi się zmienił. Spróbuj otworzyć go ponownie.",

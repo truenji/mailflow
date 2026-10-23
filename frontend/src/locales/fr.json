@@ -342,7 +342,22 @@
       "title": "En attente jusqu'à {{when}}",
       "failTitle": "Impossible de modifier l'heure de retour",
       "failBody": "L'heure précédente est conservée. Réessayez."
-    }
+    },
+    "showCorrespondence": "Afficher la correspondance"
+  },
+  "correspondence": {
+    "title": "Correspondance avec {{address}}",
+    "titleFallback": "Correspondance",
+    "count_one": "{{count}} message",
+    "count_other": "{{count}} messages",
+    "incoming": "Reçu",
+    "outgoing": "Envoyé",
+    "empty": "Aucun message avec cette adresse pour le moment",
+    "noAddress": "Impossible de déterminer le correspondant de ce message",
+    "error": "Impossible de charger la correspondance",
+    "truncated": "Seuls les messages les plus récents sont affichés",
+    "close": "Fermer",
+    "open": "Ouvrir le message"
   },
   "messageList": {
     "replyDraftChanged": "Le brouillon de réponse a changé. Essayez de le rouvrir.",
