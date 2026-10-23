@@ -86,8 +86,9 @@ async function loadAccounts(userId) {
 }
 
 // One row per message, preferring the INBOX copy when the same message exists in
-// several folders, exactly as the thread route does. The direction is resolved from
-// the sender, so a message sent from an alias still reads as outgoing.
+// several folders, exactly as the thread route does. Direction comes from the sender
+// against the user's own addresses (aliases included), not from whether the sender
+// happens to be the correspondent.
 export async function listCorrespondence({ userId, messageId }) {
   const messageResult = await query(`
     SELECT m.id, m.account_id, m.from_name, m.from_email, m.to_addresses, m.cc_addresses, m.bcc_addresses
